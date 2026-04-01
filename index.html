@@ -22,31 +22,19 @@ canvas {
   background:#000;
   border-radius:10px;
 }
-
-iframe {
-  width:100%;
-  height:400px;
-  border:none;
-  border-radius:10px;
-  margin-top:20px;
-}
 </style></head><body><h1>🔥 Mod Creator GOD 😈</h1><div class="container"><input id="itemName" placeholder="nombre_item"><h3>📦 Modelo (.geo.json)</h3>
-<input type="file" id="modelFile"><button onclick="cargarModelo()">Cargar modelo</button>
-<button onclick="pegarModelo()">Pegar modelo 😈</button>
-
-<h3>🖼️ Textura (.png)</h3>
+<input type="file" id="modelFile">
+<button onclick="cargarModelo()">Cargar modelo</button>
+<button onclick="pegarModelo()">Pegar modelo 😈</button><h3>🖼️ Textura (.png)</h3>
 <input type="file" id="textureFile"><h3>🧊 Preview 3D</h3>
-<canvas id="preview"></canvas><button onclick="copiarModelo()">Copiar modelo</button>
-<button onclick="descargarModelo()">Descargar modelo</button>
+<canvas id="preview"></canvas><button onclick="generar()">DESCARGAR MOD 💀</button>
 
-<button onclick="generar()">DESCARGAR MOD 💀</button>
-
-<h3>🧊 Editor Blockbench</h3>
-<iframe src="https://web.blockbench.net/"></iframe></div><script>
+</div><script>
 let scene, camera, renderer, controls, model;
 let modelJSON = null;
 let textureBlob = null;
 
+// 🔥 INIT 3D
 function init3D(){
   const canvas = document.getElementById("preview");
 
@@ -68,8 +56,7 @@ function init3D(){
   light.position.set(5,5,5);
   scene.add(light);
 
-  let light2 = new THREE.AmbientLight(0xffffff,0.7);
-  scene.add(light2);
+  scene.add(new THREE.AmbientLight(0xffffff,0.7));
 
   animate();
 }
@@ -81,6 +68,7 @@ function animate(){
   renderer.render(scene, camera);
 }
 
+// 🔥 CREAR MODELO
 function construirModelo(json){
   if(model) scene.remove(model);
 
@@ -90,7 +78,12 @@ function construirModelo(json){
   geo.bones.forEach(bone=>{
     if(bone.cubes){
       bone.cubes.forEach(c=>{
-        let g = new THREE.BoxGeometry(c.size[0]/16,c.size[1]/16,c.size[2]/16);
+        let g = new THREE.BoxGeometry(
+          c.size[0]/16,
+          c.size[1]/16,
+          c.size[2]/16
+        );
+
         let m = new THREE.MeshStandardMaterial({color:0xffffff});
         let mesh = new THREE.Mesh(g,m);
 
@@ -109,13 +102,13 @@ function construirModelo(json){
   let center = box.getCenter(new THREE.Vector3());
   group.position.sub(center);
 
-  let size = box.getSize(new THREE.Vector3()).length();
-  camera.position.z = size * 2;
+  camera.position.z = 3;
 
   model = group;
   scene.add(model);
 }
 
+// 📦 CARGAR MODELO
 function cargarModelo(){
   let file = document.getElementById("modelFile").files[0];
   if(!file){ alert("Sube modelo 😡"); return; }
@@ -128,6 +121,7 @@ function cargarModelo(){
   reader.readAsText(file);
 }
 
+// 😈 PEGAR MODELO
 async function pegarModelo(){
   try{
     let text = await navigator.clipboard.readText();
@@ -138,6 +132,7 @@ async function pegarModelo(){
   }
 }
 
+// 🖼️ TEXTURA
 document.getElementById("textureFile").addEventListener("change", e=>{
   textureBlob = e.target.files[0];
 
@@ -156,20 +151,7 @@ document.getElementById("textureFile").addEventListener("change", e=>{
   });
 });
 
-function copiarModelo(){
-  if(!modelJSON){ alert("No hay modelo"); return; }
-  navigator.clipboard.writeText(modelJSON);
-}
-
-function descargarModelo(){
-  if(!modelJSON){ alert("No hay modelo"); return; }
-  let blob = new Blob([modelJSON], {type:"application/json"});
-  let a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "modelo.geo.json";
-  a.click();
-}
-
+// 🔑 UUID
 function uuid(){
 return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{
 const r=Math.random()*16|0,v=c=='x'?r:(r&0x3|0x8);
@@ -177,6 +159,7 @@ return v.toString(16);
 });
 }
 
+// 💀 GENERAR MOD (FIX TOTAL)
 async function generar(){
   if(!modelJSON || !textureBlob){
     alert("Falta modelo o textura 💀");
@@ -186,12 +169,20 @@ async function generar(){
   let zip = new JSZip();
   let name = document.getElementById("itemName").value || "item";
 
+  // 📦 RP
   let rp = zip.folder(name+"_RP");
 
   rp.file("manifest.json", JSON.stringify({
     format_version:2,
-    header:{name:name,uuid:uuid(),version:[1,0,0]},
-    modules:[{type:"resources",uuid:uuid(),version:[1,0,0]}]
+    header:{
+      name:name+" RP",
+      description:"Recurso",
+      uuid:uuid(),
+      version:[1,0,0]
+    },
+    modules:[
+      {type:"resources",uuid:uuid(),version:[1,0,0]}
+    ]
   },null,2));
 
   rp.folder("models/entity").file(name+".geo.json", modelJSON);
@@ -205,11 +196,44 @@ async function generar(){
     }
   },null,2));
 
+  // 📦 BP
+  let bp = zip.folder(name+"_BP");
+
+  bp.file("manifest.json", JSON.stringify({
+    format_version:2,
+    header:{
+      name:name+" BP",
+      description:"Behavior",
+      uuid:uuid(),
+      version:[1,0,0]
+    },
+    modules:[
+      {type:"data",uuid:uuid(),version:[1,0,0]}
+    ]
+  },null,2));
+
+  bp.folder("items").file(name+".json", JSON.stringify({
+    "format_version":"1.20.10",
+    "minecraft:item":{
+      "description":{
+        "identifier":"mod:"+name,
+        "menu_category":{"category":"equipment"}
+      },
+      "components":{
+        "minecraft:icon":name
+      }
+    }
+  },null,2));
+
+  // 💾 DESCARGA FIX ANDROID
   let blob = await zip.generateAsync({type:"blob"});
+
   let a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
   a.download = name + ".mcaddon";
+  document.body.appendChild(a);
   a.click();
+  document.body.removeChild(a);
 }
 
 init3D();
