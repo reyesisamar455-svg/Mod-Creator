@@ -1,206 +1,97 @@
-<!DOCTYPE html>
-<html lang="es">
+<!DOCTYPE html><html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fábrica de Mods Suprema 😈</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<style>
-  body { font-family: 'Segoe UI', sans-serif; background: #0f172a; color: white; text-align: center; padding: 10px; }
-  .container { background: #1e293b; padding: 20px; border-radius: 15px; max-width: 500px; margin: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-  label { display: block; text-align: left; margin-top: 15px; color: #22c55e; font-weight: bold; font-size: 0.9em; }
-  select, input, button { width: 100%; padding: 12px; margin: 5px 0; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: white; box-sizing: border-box; }
-  button { background: #22c55e; border: none; font-size: 1.1em; cursor: pointer; margin-top: 20px; }
-  button:hover { background: #16a34a; transform: scale(1.02); }
-  .grid-recipe { background: #334155; padding: 10px; border-radius: 10px; margin-top: 10px; }
-  #status { color: #22c55e; margin-top: 15px; font-weight: bold; }
-  .error { color: #ef4444; }
-</style>
-</head>
-<body>
+<title>Mod Creator GOD 😈</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script><style>
+body { background:#0f172a; color:white; font-family:Arial; text-align:center; }
+.container { background:#1e293b; padding:20px; border-radius:15px; max-width:600px; margin:auto; }
+input, select, button { width:90%; padding:10px; margin:8px; border-radius:8px; border:none; }
+button { background:#22c55e; cursor:pointer; }
+.grid { display:grid; grid-template-columns:repeat(3,1fr); gap:5px; margin-top:10px; }
+.grid img { width:100%; cursor:pointer; border-radius:8px; border:2px solid transparent; }
+.grid img:hover { border:2px solid #22c55e; }
+.preview { margin-top:15px; }
+.preview img { width:100px; image-rendering:pixelated; }
+</style></head><body><h1>🔥 Mod Creator GOD 😈</h1><div class="container"><input id="itemName" placeholder="nombre_item"><select id="effect">
+<option value="regeneration">Regeneración</option>
+<option value="speed">Velocidad</option>
+<option value="strength">Fuerza</option>
+</select><input id="duration" type="number" value="10">
+<input id="level" type="number" value="5"><h3>🔎 Buscar textura</h3>
+<input id="search" placeholder="banana minecraft texture">
+<button onclick="buscar()">Buscar</button><div id="imagenes" class="grid"></div><div class="preview">
+<h3>Preview del ítem</h3>
+<img id="previewImg" src="">
+</div><button onclick="generar()">DESCARGAR MOD 😈</button>
 
-<h1>🔥 Creador .MCADDON Pro</h1>
-<div class="container">
-  <label>Nombre del Ítem:</label>
-  <input type="text" id="itemName" value="super_item" placeholder="sin espacios ni caracteres especiales">
+</div><script>
+let selectedImage = "";
 
-  <label>Efecto Mágico:</label>
-  <select id="effect">
-    <option value="regeneration">Regeneración ❤️</option>
-    <option value="speed">Velocidad ⚡</option>
-    <option value="strength">Fuerza 💪</option>
-    <option value="fire_resistance">Resistencia al Fuego 🔥</option>
-    <option value="resistance">Resistencia 🛡️</option>
-    <option value="night_vision">Visión Nocturna 👁️</option>
-    <option value="invisibility">Invisibilidad 👻</option>
-    <option value="jump_boost">Súper Salto 🦘</option>
-    <option value="water_breathing">Respiración Acuática 🫧</option>
-    <option value="absorption">Absorción (Corazones Amarillos) 💛</option>
-    <option value="health_boost">Más Corazones ❤️+</option>
-    <option value="haste">Prisa Minera ⛏️</option>
-    <option value="slow_falling">Caída Lenta 🪂</option>
-  </select>
+function buscar(){
+  let q = document.getElementById("search").value + " minecraft item";
+  let container = document.getElementById("imagenes");
+  container.innerHTML = "";
 
-  <div style="display: flex; gap: 10px;">
-    <div style="flex: 1;">
-      <label>Duración (seg):</label>
-      <input type="number" id="duration" value="30" min="1" max="32767">
-    </div>
-    <div style="flex: 1;">
-      <label>Nivel (Máx 255):</label>
-      <input type="number" id="amplifier" value="5" min="1" max="255">
-    </div>
-  </div>
+  for(let i=0;i<6;i++){
+    let img = document.createElement("img");
+    img.src = "https://source.unsplash.com/200x200/?" + encodeURIComponent(q + i);
 
-  <div class="grid-recipe">
-    <strong>Configurar Receta (3x3)</strong>
-    <label>Borde (8 unidades):</label>
-    <select id="matBorde">
-        <option value="minecraft:gold_ingot">Lingote de Oro</option>
-        <option value="minecraft:diamond">Diamante</option>
-        <option value="minecraft:netherite_ingot">Netherite</option>
-        <option value="minecraft:emerald">Esmeralda</option>
-        <option value="minecraft:iron_ingot">Hierro</option>
-        <option value="minecraft:obsidian">Obsidiana</option>
-        <option value="minecraft:dragon_breath">Aliento de Dragón</option>
-        <option value="minecraft:nether_star">Estrella del Nether</option>
-        <option value="minecraft:diamond_block">Bloque de Diamante</option>
-        <option value="minecraft:gold_block">Bloque de Oro</option>
-    </select>
-    <label>Centro (1 unidad):</label>
-    <select id="matCentro">
-        <option value="minecraft:apple">Manzana</option>
-        <option value="minecraft:golden_apple">Manzana Dorada</option>
-        <option value="minecraft:enchanted_golden_apple">Manzana de Notch</option>
-        <option value="minecraft:carrot">Zanahoria</option>
-        <option value="minecraft:totem_of_undying">Tótem</option>
-        <option value="minecraft:nether_star">Estrella del Nether</option>
-    </select>
-  </div>
+    img.onclick = () => {
+      selectedImage = img.src;
+      document.getElementById("previewImg").src = selectedImage;
+    };
 
-  <button onclick="generarTodo()">DESCARGAR .MCADDON 🚀</button>
-  <p id="status"></p>
-</div>
-
-<script>
-function uuid() { 
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { 
-        const r = Math.random() * 16 | 0; 
-        return (c == 'x' ? r : (r & 0x3 | 0x8)).toString(16); 
-    }); 
+    container.appendChild(img);
+  }
 }
 
-function validateInputs() {
-    const name = document.getElementById("itemName").value.trim();
-    const dur = parseInt(document.getElementById("duration").value);
-    const amp = parseInt(document.getElementById("amplifier").value);
-    
-    if (!name || name.length === 0) {
-        showError("El nombre del ítem no puede estar vacío");
-        return false;
-    }
-    if (!/^[a-z0-9_]+$/.test(name)) {
-        showError("El nombre solo puede contener letras minúsculas, números y guiones bajos");
-        return false;
-    }
-    if (dur < 1 || dur > 32767) {
-        showError("La duración debe estar entre 1 y 32767 segundos");
-        return false;
-    }
-    if (amp < 1 || amp > 255) {
-        showError("El nivel debe estar entre 1 y 255");
-        return false;
-    }
-    return true;
+function uuid(){
+return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{
+const r=Math.random()*16|0,v=c=='x'?r:(r&0x3|0x8);
+return v.toString(16);
+});
 }
 
-function showError(message) {
-    const status = document.getElementById("status");
-    status.innerText = message;
-    status.className = "error";
-}
+async function generar(){
+  let zip = new JSZip();
 
-function showSuccess(message) {
-    const status = document.getElementById("status");
-    status.innerText = message;
-    status.className = "";
-}
+  let name = document.getElementById("itemName").value || "item";
+  let effect = document.getElementById("effect").value;
+  let duration = document.getElementById("duration").value;
+  let level = document.getElementById("level").value - 1;
 
-async function generarTodo() {
-    if (!validateInputs()) return;
-    
-    if (typeof JSZip === "undefined") {
-        showError("¡Error! La librería JSZip no cargó. Recarga la página.");
-        return;
+  let id = "ia:" + name;
+
+  let manifest = {
+    format_version:2,
+    header:{name:name,uuid:uuid(),version:[1,0,0]},
+    modules:[{type:"data",uuid:uuid(),version:[1,0,0]}]
+  };
+
+  let item = {
+    format_version:"1.20.10",
+    "minecraft:item":{
+      description:{identifier:id},
+      components:{
+        "minecraft:icon":"apple",
+        "minecraft:food":{
+          nutrition:5,
+          can_always_eat:true,
+          effects:[{name:effect,duration:duration,amplifier:level}]
+        }
+      }
     }
-    
-    try {
-        const zip = new JSZip();
-        const name = document.getElementById("itemName").value.toLowerCase().replace(/ /g, "_");
-        const effect = document.getElementById("effect").value;
-        const dur = parseInt(document.getElementById("duration").value);
-        const amp = parseInt(document.getElementById("amplifier").value) - 1;
-        const b = document.getElementById("matBorde").value;
-        const c = document.getElementById("matCentro").value;
-        const id = "ia:" + name;
+  };
 
-        showSuccess("Empaquetando mod...");
+  let bp = zip.folder("mod_BP");
+  bp.file("manifest.json", JSON.stringify(manifest,null,2));
+  bp.folder("items").file(name+".json", JSON.stringify(item,null,2));
 
-        const manifest = {
-            "format_version": 2,
-            "header": { 
-                "name": "Mod " + name, 
-                "description": "Creado con Minecraft Mod Creator", 
-                "uuid": uuid(), 
-                "version": [1,0,0], 
-                "min_engine_version": [1,20,0] 
-            },
-            "modules": [{ "type": "data", "uuid": uuid(), "version": [1,0,0] }] 
-        };
-
-        const item = {
-            "format_version": "1.20.10",
-            "minecraft:item": {
-                "description": { "identifier": id, "menu_category": { "category": "equipment" } },
-                "components": {
-                    "minecraft:icon": "apple",
-                    "minecraft:food": { 
-                        "nutrition": 10, 
-                        "can_always_eat": true, 
-                        "effects": [{ "name": effect, "duration": dur, "amplifier": amp }] 
-                    }
-                }
-            }
-        };
-
-        const recipe = {
-            "format_version": "1.20.10",
-            "minecraft:recipe_shaped": {
-                "description": { "identifier": "recipe:" + name },
-                "tags": ["crafting_table"],
-                "pattern": ["BBB", "BCB", "BBB"],
-                "key": { "B": { "item": b }, "C": { "item": c } },
-                "result": { "item": id, "count": 1 }
-            }
-        };
-
-        const bp = zip.folder(name + "_BP");
-        bp.file("manifest.json", JSON.stringify(manifest, null, 2));
-        bp.folder("items").file(name + ".json", JSON.stringify(item, null, 2));
-        bp.folder("recipes").file(name + "_receta.json", JSON.stringify(recipe, null, 2));
-
-        const blob = await zip.generateAsync({type:"blob"});
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = name + ".mcaddon";
-        link.click();
-        
-        showSuccess("¡MOD DESCARGADO! 🍌");
-    } catch (error) {
-        showError("Error al generar el mod: " + error.message);
-        console.error(error);
-    }
+  let blob = await zip.generateAsync({type:"blob"});
+  let a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = name + ".mcaddon";
+  a.click();
 }
-</script>
-</body>
+</script></body>
 </html>
