@@ -1,49 +1,74 @@
 <!DOCTYPE html><html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Mod Creator GOD 😈</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script><style>
+<title>Mod Creator ULTRA 😈</title><script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script><style>
 body { background:#0f172a; color:white; font-family:Arial; text-align:center; }
 .container { background:#1e293b; padding:20px; border-radius:15px; max-width:600px; margin:auto; }
-input, select, button { width:90%; padding:10px; margin:8px; border-radius:8px; border:none; }
+input, button { width:90%; padding:10px; margin:10px; border-radius:8px; border:none; }
 button { background:#22c55e; cursor:pointer; }
-.grid { display:grid; grid-template-columns:repeat(3,1fr); gap:5px; margin-top:10px; }
-.grid img { width:100%; cursor:pointer; border-radius:8px; border:2px solid transparent; }
-.grid img:hover { border:2px solid #22c55e; }
-.preview { margin-top:15px; }
-.preview img { width:100px; image-rendering:pixelated; }
-</style></head><body><h1>🔥 Mod Creator GOD 😈</h1><div class="container"><input id="itemName" placeholder="nombre_item"><select id="effect">
-<option value="regeneration">Regeneración</option>
-<option value="speed">Velocidad</option>
-<option value="strength">Fuerza</option>
-</select><input id="duration" type="number" value="10">
-<input id="level" type="number" value="5"><h3>🔎 Buscar textura</h3>
-<input id="search" placeholder="banana minecraft texture">
-<button onclick="buscar()">Buscar</button><div id="imagenes" class="grid"></div><div class="preview">
-<h3>Preview del ítem</h3>
-<img id="previewImg" src="">
-</div><button onclick="generar()">DESCARGAR MOD 😈</button>
+
+canvas { width:100%; height:300px; background:#000; border-radius:10px; }
+</style></head><body><h1>🔥 Mod Creator ULTRA 😈</h1><div class="container"><input id="itemName" placeholder="nombre_item"><h3>📦 Subir modelo (.geo.json)</h3>
+<input type="file" id="modelFile" accept=".json"><h3>🖼️ Subir textura (.png)</h3>
+<input type="file" id="textureFile" accept="image/png"><h3>🧊 Preview 3D</h3>
+<canvas id="preview"></canvas><button onclick="cargarModelo()">Cargar modelo</button>
+<button onclick="generar()">DESCARGAR MOD 💀</button>
 
 </div><script>
-let selectedImage = "";
+let scene, camera, renderer, cube;
+let modelJSON = null;
+let textureBlob = null;
 
-function buscar(){
-  let q = document.getElementById("search").value + " minecraft item";
-  let container = document.getElementById("imagenes");
-  container.innerHTML = "";
+function init3D(){
+  const canvas = document.getElementById("preview");
+  renderer = new THREE.WebGLRenderer({canvas});
+  renderer.setSize(canvas.clientWidth, 300);
 
-  for(let i=0;i<6;i++){
-    let img = document.createElement("img");
-    img.src = "https://source.unsplash.com/200x200/?" + encodeURIComponent(q + i);
+  scene = new THREE.Scene();
+  camera = new THREE.PerspectiveCamera(75, canvas.clientWidth/300, 0.1, 1000);
+  camera.position.z = 5;
 
-    img.onclick = () => {
-      selectedImage = img.src;
-      document.getElementById("previewImg").src = selectedImage;
-    };
+  const light = new THREE.PointLight(0xffffff, 1);
+  light.position.set(5,5,5);
+  scene.add(light);
 
-    container.appendChild(img);
-  }
+  animate();
 }
+
+function animate(){
+  requestAnimationFrame(animate);
+  if(cube) cube.rotation.y += 0.01;
+  renderer.render(scene, camera);
+}
+
+function cargarModelo(){
+  let file = document.getElementById("modelFile").files[0];
+  if(!file){ alert("Sube un modelo 😡"); return; }
+
+  let reader = new FileReader();
+  reader.onload = function(e){
+    modelJSON = e.target.result;
+
+    if(cube) scene.remove(cube);
+
+    let geometry = new THREE.BoxGeometry();
+    let material = new THREE.MeshStandardMaterial({color:0x00ff00});
+    cube = new THREE.Mesh(geometry, material);
+    scene.add(cube);
+  };
+  reader.readAsText(file);
+}
+
+document.getElementById("textureFile").addEventListener("change", e=>{
+  textureBlob = e.target.files[0];
+
+  let url = URL.createObjectURL(textureBlob);
+  let loader = new THREE.TextureLoader();
+
+  loader.load(url, tex=>{
+    if(cube) cube.material.map = tex;
+  });
+});
 
 function uuid(){
 return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{
@@ -53,39 +78,46 @@ return v.toString(16);
 }
 
 async function generar(){
+  if(!modelJSON || !textureBlob){
+    alert("Falta modelo o textura 💀");
+    return;
+  }
+
   let zip = new JSZip();
-
   let name = document.getElementById("itemName").value || "item";
-  let effect = document.getElementById("effect").value;
-  let duration = document.getElementById("duration").value;
-  let level = document.getElementById("level").value - 1;
 
-  let id = "ia:" + name;
-
-  let manifest = {
+  let manifestBP = {
     format_version:2,
-    header:{name:name,uuid:uuid(),version:[1,0,0]},
+    header:{name:name+" BP",uuid:uuid(),version:[1,0,0]},
     modules:[{type:"data",uuid:uuid(),version:[1,0,0]}]
   };
 
-  let item = {
-    format_version:"1.20.10",
-    "minecraft:item":{
-      description:{identifier:id},
-      components:{
-        "minecraft:icon":"apple",
-        "minecraft:food":{
-          nutrition:5,
-          can_always_eat:true,
-          effects:[{name:effect,duration:duration,amplifier:level}]
-        }
-      }
-    }
+  let manifestRP = {
+    format_version:2,
+    header:{name:name+" RP",uuid:uuid(),version:[1,0,0]},
+    modules:[{type:"resources",uuid:uuid(),version:[1,0,0]}]
   };
 
-  let bp = zip.folder("mod_BP");
-  bp.file("manifest.json", JSON.stringify(manifest,null,2));
-  bp.folder("items").file(name+".json", JSON.stringify(item,null,2));
+  let bp = zip.folder(name+"_BP");
+  let rp = zip.folder(name+"_RP");
+
+  // guardar modelo
+  rp.folder("models/entity").file(name+".geo.json", modelJSON);
+
+  // guardar textura
+  rp.folder("textures/items").file(name+".png", textureBlob);
+
+  // textura json
+  rp.folder("textures").file("item_texture.json", JSON.stringify({
+    resource_pack_name:"mod",
+    texture_name:"atlas.items",
+    texture_data:{
+      [name]:{textures:"textures/items/"+name}
+    }
+  },null,2));
+
+  bp.file("manifest.json", JSON.stringify(manifestBP,null,2));
+  rp.file("manifest.json", JSON.stringify(manifestRP,null,2));
 
   let blob = await zip.generateAsync({type:"blob"});
   let a = document.createElement("a");
@@ -93,5 +125,7 @@ async function generar(){
   a.download = name + ".mcaddon";
   a.click();
 }
+
+init3D();
 </script></body>
 </html>
