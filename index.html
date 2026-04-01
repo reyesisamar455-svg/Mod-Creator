@@ -233,10 +233,26 @@ async function generar(){
         "components":{"minecraft:icon":name}
       }
     }));
+// 🎨 ICONO LOCAL (SIN INTERNET)
+let canvasIcon = document.createElement("canvas");
+canvasIcon.width = 64;
+canvasIcon.height = 64;
 
-    let icon = await fetch("https://via.placeholder.com/64").then(r=>r.blob());
-    rp.file("pack_icon.png", icon);
-    bp.file("pack_icon.png", icon);
+let ctxIcon = canvasIcon.getContext("2d");
+
+// fondo negro
+ctxIcon.fillStyle = "#111";
+ctxIcon.fillRect(0,0,64,64);
+
+// cuadrado verde
+ctxIcon.fillStyle = "#22c55e";
+ctxIcon.fillRect(16,16,32,32);
+
+// convertir a blob
+let icon = await new Promise(res => canvasIcon.toBlob(res));
+
+rp.file("pack_icon.png", icon);
+bp.file("pack_icon.png", icon);
 
     let blob = await zip.generateAsync({type:"blob"});
     window.modBlob = blob;
