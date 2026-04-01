@@ -2,7 +2,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mod Creator GOD 😈</title><script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script><script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/controls/OrbitControls.js"></script><style>
+<title>Mod Creator GOD </title><script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script><script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/controls/OrbitControls.js"></script><style>
 body { background:#0f172a; color:white; font-family:Arial; text-align:center; }
 .container { background:#1e293b; padding:20px; border-radius:15px; max-width:650px; margin:auto; }
 
@@ -22,22 +22,16 @@ canvas {
   background:#000;
   border-radius:10px;
 }
-
-iframe {
-  width:100%;
-  height:400px;
-  margin-top:15px;
-  border-radius:10px;
-  border:none;
-}
-</style></head><body><h1>🔥 Mod Creator GOD 😈</h1><div class="container"><input id="itemName" placeholder="nombre_item"><h3>📦 Modelo (.geo.json)</h3>
+</style></head><body><h1> Mod Creator GOD </h1><div class="container"><input id="itemName" placeholder="nombre_item"><h3>📦 Modelo (.geo.json)</h3>
 <input type="file" id="modelFile"><h3>🖼️ Textura (.png)</h3>
 <input type="file" id="textureFile"><h3>🧊 Preview 3D</h3>
 <canvas id="preview"></canvas><button onclick="cargarModelo()">Cargar modelo</button>
-<button onclick="abrirBlockbench()">Abrir Blockbench 😈</button>
 
-<h3>🧊 Editor real</h3>
-<iframe src="https://web.blockbench.net/"></iframe><button onclick="generar()">DESCARGAR MOD 💀</button>
+<button onclick="abrirBlockbench()">Abrir Blockbench 😈</button>
+<button onclick="descargarModelo()">Descargar modelo 🧊</button>
+<button onclick="copiarModelo()">Copiar modelo 📋</button>
+
+<button onclick="generar()">DESCARGAR MOD 💀</button>
 
 </div><script>
 let scene, camera, renderer, controls, model;
@@ -116,12 +110,10 @@ function cargarModelo(){
       }
     });
 
-    // 🔥 CENTRAR
     let box = new THREE.Box3().setFromObject(group);
     let center = box.getCenter(new THREE.Vector3());
     group.position.sub(center);
 
-    // 🔥 AJUSTAR CÁMARA
     let size = box.getSize(new THREE.Vector3()).length();
     camera.position.z = size * 2;
 
@@ -152,6 +144,29 @@ document.getElementById("textureFile").addEventListener("change", e=>{
 
 function abrirBlockbench(){
   window.open("https://web.blockbench.net/");
+}
+
+function descargarModelo(){
+  if(!modelJSON){
+    alert("No hay modelo 😡");
+    return;
+  }
+
+  let blob = new Blob([modelJSON], {type:"application/json"});
+  let a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "modelo.geo.json";
+  a.click();
+}
+
+function copiarModelo(){
+  if(!modelJSON){
+    alert("No hay modelo 😡");
+    return;
+  }
+
+  navigator.clipboard.writeText(modelJSON);
+  alert("Modelo copiado 😈 pégalo en Blockbench");
 }
 
 function uuid(){
